@@ -454,123 +454,6 @@
                 font-size: 1.6rem;
             }
         }
-
-        html, body {
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .product-node,
-        .compare-image,
-        .stat-card,
-        .purify-desc,
-        .orbit-wrapper {
-            will-change: transform, opacity;
-            backface-visibility: hidden;
-            transform: translateZ(0);
-        }
-
-        /* 手機降載 */
-        @media (max-width: 768px) {
-            .logo-text {
-                letter-spacing: 0.22em;
-                margin-right: -0.22em;
-            }
-
-            .section-hero,
-            .sticky-container,
-            .section-compare {
-                min-height: 100svh;
-                height: 100svh;
-            }
-
-            .hero-overlay-content h1 {
-                font-size: clamp(1.6rem, 8vw, 2.6rem);
-                letter-spacing: 0.14em;
-            }
-
-            .hero-overlay-content p {
-                font-size: 0.95rem;
-                letter-spacing: 0.12em;
-            }
-
-            .text-area {
-                height: 36vh;
-                padding-top: 40px;
-            }
-
-            .image-area {
-                height: 64vh;
-                perspective: none;
-            }
-
-            .text-wrapper {
-                max-width: 92%;
-            }
-
-            .purify-desc h2 {
-                font-size: 1.7rem;
-                margin-bottom: 10px;
-                text-shadow: none;
-            }
-
-            .purify-desc p {
-                font-size: 0.95rem;
-                line-height: 1.5;
-            }
-
-            .orbit-wrapper {
-                width: 820px;
-                height: 820px;
-            }
-
-            .product-node {
-                width: 220px;
-                height: 220px;
-                filter: none !important;
-            }
-
-            .product-node.active {
-                filter: none !important;
-            }
-
-            .product-node img {
-                filter: none !important;
-            }
-
-            .section-purify::after,
-            .section-stats::after {
-                opacity: 0.45;
-            }
-
-            .stat-card {
-                min-height: 180px;
-                border-radius: 18px;
-                backdrop-filter: none;
-                -webkit-backdrop-filter: none;
-                box-shadow: 0 10px 24px rgba(0,0,0,0.16);
-            }
-
-            .stats-heading {
-                margin-bottom: 32px;
-            }
-
-            .stats-heading h2 {
-                letter-spacing: 0.08em;
-            }
-
-            .compare-label {
-                left: 18px;
-                bottom: 20px;
-            }
-
-            .compare-label h2 {
-                font-size: 1.15rem;
-            }
-
-            .compare-track::after {
-                background: rgba(255,255,255,0.08);
-            }
-        }
     </style>
 </head>
 <body>
@@ -710,184 +593,118 @@
     </footer>
 
     <script>
-            gsap.registerPlugin(ScrollTrigger);
+        gsap.registerPlugin(ScrollTrigger);
 
-            ScrollTrigger.config({
-                ignoreMobileResize: true
-            });
+        const orbit = document.getElementById('orbit');
+        const nodes = document.querySelectorAll('.product-node');
+        const texts = document.querySelectorAll('.purify-desc');
 
-            const mm = gsap.matchMedia();
+        const radius = 700;
+        const angleStep = 30; // 四張圖時角度收斂一點比較順
 
-            const orbit = document.getElementById('orbit');
-            const nodes = document.querySelectorAll('.product-node');
-            const texts = document.querySelectorAll('.purify-desc');
+        // 初始化位置
+        nodes.forEach((node, i) => {
+            const startAngle = 270;
+            const centerOffset = (nodes.length - 1) / 2; // 4張圖時 = 1.5
+            const angle = startAngle + (i - centerOffset) * angleStep;
+            const radian = angle * Math.PI / 180;
+            const x = Math.cos(radian) * radius;
+            const y = Math.sin(radian) * radius;
+            gsap.set(node, { x, y, rotation: 0 });
+        });
 
-            function setActiveByProgress(progress) {
-                let index = 0;
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".section-purify",
+                start: "top top",
+                end: "+=5000",
+                scrub: 1,
+                pin: true,
+                pinSpacing: true,
+                anticipatePin: 1,
+                onUpdate: (self) => {
+                    const p = self.progress;
+                    let index = 0;
 
-                if (progress <= 0.25) {
-                    index = 0;
-                } else if (progress <= 0.5) {
-                    index = 1;
-                } else if (progress <= 0.75) {
-                    index = 2;
-                } else {
-                    index = 3;
+                    if (p <= 0.25) {
+                        index = 0;
+                    } else if (p <= 0.5) {
+                        index = 1;
+                    } else if (p <= 0.75) {
+                        index = 2;
+                    } else {
+                        index = 3;
+                    }
+
+                    nodes.forEach((n, i) => n.classList.toggle('active', i === index));
+                    texts.forEach((t, i) => t.classList.toggle('active', i === index));
                 }
-
-                nodes.forEach((n, i) => n.classList.toggle('active', i === index));
-                texts.forEach((t, i) => t.classList.toggle('active', i === index));
             }
+        });
 
-            mm.add("(min-width: 769px)", () => {
-                const radius = 700;
-                const angleStep = 30;
+        // 軌道旋轉範圍加大，讓第4張也能進到主視角
+        tl.fromTo(
+            orbit,
+            { rotation: angleStep * 1.5 },
+            { rotation: -angleStep * 1.5, ease: "none" }
+        );
 
-                nodes.forEach((node, i) => {
-                    const startAngle = 270;
-                    const centerOffset = (nodes.length - 1) / 2;
-                    const angle = startAngle + (i - centerOffset) * angleStep;
-                    const radian = angle * Math.PI / 180;
-                    const x = Math.cos(radian) * radius;
-                    const y = Math.sin(radian) * radius;
-                    gsap.set(node, { x, y, rotation: 0 });
-                });
+        // 子節點反向補償
+        nodes.forEach((node) => {
+            tl.fromTo(
+                node,
+                { rotation: -angleStep * 1.5 },
+                { rotation: angleStep * 1.5, ease: "none" },
+                0
+            );
+        });
 
-                const tl = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: ".section-purify",
-                        start: "top top",
-                        end: "+=5200",
-                        scrub: 0.6,
-                        pin: true,
-                        pinSpacing: true,
-                        anticipatePin: 1,
-                        onUpdate: (self) => setActiveByProgress(self.progress)
-                    }
-                });
+        gsap.fromTo(".stat-card",
+            {
+                y: 50,
+                opacity: 0
+            },
+            {
+                y: 0,
+                opacity: 1,
+                duration: 1.2,
+                ease: "power3.out",
+                stagger: 0.16,
+                scrollTrigger: {
+                    trigger: ".section-stats",
+                    start: "top 72%",
+                    once: true
+                }
+            }
+        );
 
-                tl.fromTo(
-                    orbit,
-                    { rotation: angleStep * 1.5 },
-                    { rotation: -angleStep * 1.5, ease: "none" }
-                );
+        gsap.set(".image-before-1", { yPercent: 0 });
+        gsap.set(".image-after-1", { yPercent: 0 });
 
-                nodes.forEach((node) => {
-                    tl.fromTo(
-                        node,
-                        { rotation: -angleStep * 1.5 },
-                        { rotation: angleStep * 1.5, ease: "none" },
-                        0
-                    );
-                });
+        gsap.set(".image-before-2", { yPercent: 100 });
+        gsap.set(".image-after-2", { yPercent: -100 });
 
-                gsap.fromTo(".stat-card",
-                    { y: 50, opacity: 0 },
-                    {
-                        y: 0,
-                        opacity: 1,
-                        duration: 1,
-                        ease: "power3.out",
-                        stagger: 0.14,
-                        scrollTrigger: {
-                            trigger: ".section-stats",
-                            start: "top 75%",
-                            once: true
-                        }
-                    }
-                );
+        const compareTl = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".section-compare",
+                start: "top top",
+                end: "+=2200",
+                scrub: 1,
+                pin: true,
+                pinSpacing: true,
+                anticipatePin: 1
+            }
+        });
 
-                gsap.set(".image-before-1", { yPercent: 0 });
-                gsap.set(".image-after-1", { yPercent: 0 });
-                gsap.set(".image-before-2", { yPercent: 100 });
-                gsap.set(".image-after-2", { yPercent: -100 });
-
-                const compareTl = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: ".section-compare",
-                        start: "top top",
-                        end: "+=1600",
-                        scrub: 0.6,
-                        pin: true,
-                        pinSpacing: true,
-                        anticipatePin: 1
-                    }
-                });
-
-                compareTl
-                    .to(".image-before-2", { yPercent: 0, ease: "none" }, 0)
-                    .to(".image-after-2", { yPercent: 0, ease: "none" }, 0);
-            });
-
-            mm.add("(max-width: 768px)", () => {
-                const radius = 360;
-                const angleStep = 24;
-
-                nodes.forEach((node, i) => {
-                    const startAngle = 270;
-                    const centerOffset = (nodes.length - 1) / 2;
-                    const angle = startAngle + (i - centerOffset) * angleStep;
-                    const radian = angle * Math.PI / 180;
-                    const x = Math.cos(radian) * radius;
-                    const y = Math.sin(radian) * radius;
-                    gsap.set(node, { x, y, rotation: 0 });
-                });
-
-                const tlMobile = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: ".section-purify",
-                        start: "top top",
-                        end: "+=2600",
-                        scrub: 0.4,
-                        pin: true,
-                        pinSpacing: true,
-                        anticipatePin: 1,
-                        onUpdate: (self) => setActiveByProgress(self.progress)
-                    }
-                });
-
-                tlMobile.to(orbit, {
-                    rotation: -angleStep * 2,
-                    ease: "none"
-                }, 0);
-
-                gsap.fromTo(".stat-card",
-                    { y: 24, opacity: 0 },
-                    {
-                        y: 0,
-                        opacity: 1,
-                        duration: 0.7,
-                        ease: "power2.out",
-                        stagger: 0.08,
-                        scrollTrigger: {
-                            trigger: ".section-stats",
-                            start: "top 85%",
-                            once: true
-                        }
-                    }
-                );
-
-                gsap.set(".image-before-1", { yPercent: 0 });
-                gsap.set(".image-after-1", { yPercent: 0 });
-                gsap.set(".image-before-2", { yPercent: 100 });
-                gsap.set(".image-after-2", { yPercent: -100 });
-
-                const compareTlMobile = gsap.timeline({
-                    scrollTrigger: {
-                        trigger: ".section-compare",
-                        start: "top top",
-                        end: "+=900",
-                        scrub: 0.35,
-                        pin: true,
-                        pinSpacing: true,
-                        anticipatePin: 1
-                    }
-                });
-
-                compareTlMobile
-                    .to(".image-before-2", { yPercent: 0, ease: "none" }, 0)
-                    .to(".image-after-2", { yPercent: 0, ease: "none" }, 0);
-            });
-        </script>
+        compareTl
+            .to(".image-before-2", {
+                yPercent: 0,
+                ease: "none"
+            }, 0)
+            .to(".image-after-2", {
+                yPercent: 0,
+                ease: "none"
+            }, 0);
+    </script>
 </body>
 </html>
