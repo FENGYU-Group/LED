@@ -9,14 +9,40 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --accent: #00AEEF; --dark: #0a0a0a; --text-gray: rgba(255,255,255,0.7); }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: "Helvetica Neue", Arial, sans-serif; background: var(--dark); color: white; overflow-x: hidden; }
-        .logo-text { letter-spacing: 0.4em; margin-right: -0.4em; }
+        :root {
+            --accent: #00AEEF;
+            --dark: #0a0a0a;
+            --text-gray: rgba(255,255,255,0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            background: var(--dark);
+            color: white;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        .logo-text {
+            letter-spacing: 0.4em;
+            margin-right: -0.4em;
+        }
 
         .section-hero {
             position: relative;
             height: 100vh;
+            height: 100svh;
             overflow: hidden;
             display: flex;
             align-items: center;
@@ -66,6 +92,7 @@
                 radial-gradient(circle at 14% 78%, rgba(23, 79, 86, 0.34) 0%, rgba(23, 79, 86, 0) 28%),
                 radial-gradient(circle at 72% 82%, rgba(18, 88, 92, 0.22) 0%, rgba(18, 88, 92, 0) 24%),
                 linear-gradient(135deg, #081411 0%, #0d2727 42%, #123f4c 72%, #0a2328 100%);
+            contain: layout paint style;
         }
 
         .section-purify::before {
@@ -97,6 +124,7 @@
             position: relative;
             z-index: 2;
             height: 100vh;
+            height: 100svh;
             width: 100%;
             overflow: hidden;
             display: flex;
@@ -126,7 +154,7 @@
             position: absolute;
             opacity: 0;
             transform: translateY(30px);
-            transition: all 0.5s ease;
+            transition: opacity 0.5s ease, transform 0.5s ease;
             text-align: center;
             width: 100%;
             padding: 0 20px;
@@ -178,7 +206,7 @@
             align-items: center;
             opacity: 0.2;
             filter: grayscale(1) blur(5px);
-            transition: opacity 0.6s, filter 0.6s;
+            transition: opacity 0.6s ease, filter 0.6s ease;
         }
 
         .product-node.active {
@@ -190,8 +218,9 @@
             max-height: 100%;
             max-width: 100%;
             object-fit: contain;
-            filter: drop-shadow(0 0 30px rgba(131, 215, 174, 0.16))
-                    drop-shadow(0 0 60px rgba(106, 173, 140, 0.10));
+            filter:
+                drop-shadow(0 0 30px rgba(131, 215, 174, 0.16))
+                drop-shadow(0 0 60px rgba(106, 173, 140, 0.10));
         }
 
         .section-stats {
@@ -210,6 +239,7 @@
                 radial-gradient(circle at 14% 78%, rgba(23, 79, 86, 0.34) 0%, rgba(23, 79, 86, 0) 28%),
                 radial-gradient(circle at 72% 82%, rgba(18, 88, 92, 0.22) 0%, rgba(18, 88, 92, 0) 24%),
                 linear-gradient(135deg, #081411 0%, #0d2727 42%, #123f4c 72%, #0a2328 100%);
+            contain: layout paint style;
         }
 
         .section-stats::before {
@@ -283,7 +313,6 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-
             opacity: 0;
             transform: translateY(50px);
         }
@@ -324,26 +353,6 @@
             line-height: 1.6;
         }
 
-        @media (max-width: 1100px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-        }
-
-        @media (max-width: 640px) {
-            .section-stats {
-                padding: 100px 24px 80px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .stat-card {
-                min-height: 200px;
-            }
-        }
-
         .hero-mask {
             position: absolute;
             inset: 0;
@@ -359,8 +368,10 @@
         .section-compare {
             position: relative;
             height: 100vh;
+            height: 100svh;
             overflow: hidden;
             background: #050505;
+            contain: layout paint style;
         }
 
         .compare-track {
@@ -444,6 +455,24 @@
             z-index: 5;
         }
 
+        /* 動畫元素做層提升 */
+        .hero-bg,
+        .orbit-wrapper,
+        .product-node,
+        .purify-desc,
+        .compare-image,
+        .stat-card {
+            will-change: transform, opacity;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+
+        @media (max-width: 1100px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
         @media (max-width: 900px) {
             .compare-label {
                 left: 22px;
@@ -452,6 +481,100 @@
 
             .compare-label h2 {
                 font-size: 1.6rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding-top: 24px !important;
+                padding-bottom: 24px !important;
+                padding-left: 20px !important;
+                padding-right: 20px !important;
+            }
+
+            .hero-bg {
+                filter: brightness(0.78);
+            }
+
+            .sticky-container {
+                overflow: hidden;
+            }
+
+            .text-area {
+                height: 38vh;
+            }
+
+            .image-area {
+                height: 62vh;
+            }
+
+            .orbit-wrapper {
+                width: 1000px;
+                height: 1000px;
+            }
+
+            .product-node {
+                width: 320px;
+                height: 320px;
+                filter: grayscale(0.35);
+                transition: opacity 0.35s ease, filter 0.35s ease;
+            }
+
+            .product-node.active {
+                filter: grayscale(0);
+            }
+
+            .product-node img {
+                filter: drop-shadow(0 0 12px rgba(131, 215, 174, 0.10));
+            }
+
+            .purify-desc {
+                transition: opacity 0.3s ease, transform 0.3s ease;
+            }
+
+            .purify-desc h2 {
+                font-size: 1.8rem;
+                margin-bottom: 10px;
+            }
+
+            .purify-desc p {
+                font-size: 0.98rem;
+                line-height: 1.55;
+            }
+
+            .section-stats {
+                padding: 100px 24px 80px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                min-height: 200px;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
+                background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.05) 100%);
+            }
+
+            .section-purify::after,
+            .section-stats::after {
+                opacity: 0.45;
+                mix-blend-mode: normal;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .compare-label h2 {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .purify-desc,
+            .product-node,
+            .stat-card {
+                transition: none !important;
             }
         }
     </style>
@@ -463,7 +586,7 @@
     </nav>
 
     <section class="section-hero hero-forest">
-        <img src="./images/bg.png" alt="台東森林背景" class="hero-bg">
+        <img src="./images/bg.png" alt="台東森林背景" class="hero-bg" decoding="async" fetchpriority="high">
         <div class="hero-mask"></div>
         <div class="hero-overlay-content">
             <h1>BEYOND PURIFICATION</h1>
@@ -500,10 +623,18 @@
 
             <div class="image-area">
                 <div class="orbit-wrapper" id="orbit">
-                    <div class="product-node"><img src="./images/1.png" alt="物理槽"></div>
-                    <div class="product-node"><img src="./images/2.png" alt="濾料管"></div>
-                    <div class="product-node"><img src="./images/3.png" alt="UVC單元"></div>
-                    <div class="product-node"><img src="./images/4.png" alt="極致純粹"></div>
+                    <div class="product-node">
+                        <img src="./images/1.png" alt="物理槽" loading="lazy" decoding="async">
+                    </div>
+                    <div class="product-node">
+                        <img src="./images/2.png" alt="濾料管" loading="lazy" decoding="async">
+                    </div>
+                    <div class="product-node">
+                        <img src="./images/3.png" alt="UVC單元" loading="lazy" decoding="async">
+                    </div>
+                    <div class="product-node">
+                        <img src="./images/4.png" alt="極致純粹" loading="lazy" decoding="async">
+                    </div>
                 </div>
             </div>
         </div>
@@ -560,10 +691,10 @@
         <div class="compare-track">
             <div class="compare-panel compare-before">
                 <div class="compare-image image-before-1">
-                    <img src="./images/before1.png" alt="淨化前 1">
+                    <img src="./images/before1.png" alt="淨化前 1" loading="lazy" decoding="async">
                 </div>
                 <div class="compare-image image-before-2">
-                    <img src="./images/before2.png" alt="淨化前 2">
+                    <img src="./images/before2.png" alt="淨化前 2" loading="lazy" decoding="async">
                 </div>
 
                 <div class="compare-overlay"></div>
@@ -574,10 +705,10 @@
 
             <div class="compare-panel compare-after">
                 <div class="compare-image image-after-1">
-                    <img src="./images/after1.png" alt="淨化後 1">
+                    <img src="./images/after1.png" alt="淨化後 1" loading="lazy" decoding="async">
                 </div>
                 <div class="compare-image image-after-2">
-                    <img src="./images/after2.png" alt="淨化後 2">
+                    <img src="./images/after2.png" alt="淨化後 2" loading="lazy" decoding="async">
                 </div>
 
                 <div class="compare-overlay"></div>
@@ -598,30 +729,39 @@
         const orbit = document.getElementById('orbit');
         const nodes = document.querySelectorAll('.product-node');
         const texts = document.querySelectorAll('.purify-desc');
+        const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
-        const radius = 700;
-        const angleStep = 30; // 四張圖時角度收斂一點比較順
+        const radius = isMobile ? 500 : 700;
+        const angleStep = isMobile ? 24 : 30;
+        let currentIndex = -1;
 
         // 初始化位置
         nodes.forEach((node, i) => {
             const startAngle = 270;
-            const centerOffset = (nodes.length - 1) / 2; // 4張圖時 = 1.5
+            const centerOffset = (nodes.length - 1) / 2;
             const angle = startAngle + (i - centerOffset) * angleStep;
             const radian = angle * Math.PI / 180;
             const x = Math.cos(radian) * radius;
             const y = Math.sin(radian) * radius;
-            gsap.set(node, { x, y, rotation: 0 });
+
+            gsap.set(node, {
+                x,
+                y,
+                rotation: 0,
+                force3D: true
+            });
         });
 
-        const tl = gsap.timeline({
+        const purifyTl = gsap.timeline({
             scrollTrigger: {
                 trigger: ".section-purify",
                 start: "top top",
-                end: "+=5000",
-                scrub: 1,
+                end: isMobile ? "+=2800" : "+=5000",
+                scrub: isMobile ? 0.4 : 1,
                 pin: true,
                 pinSpacing: true,
                 anticipatePin: 1,
+                invalidateOnRefresh: true,
                 onUpdate: (self) => {
                     const p = self.progress;
                     let index = 0;
@@ -636,30 +776,32 @@
                         index = 3;
                     }
 
-                    nodes.forEach((n, i) => n.classList.toggle('active', i === index));
-                    texts.forEach((t, i) => t.classList.toggle('active', i === index));
+                    if (index !== currentIndex) {
+                        currentIndex = index;
+                        nodes.forEach((n, i) => n.classList.toggle('active', i === index));
+                        texts.forEach((t, i) => t.classList.toggle('active', i === index));
+                    }
                 }
             }
         });
 
-        // 軌道旋轉範圍加大，讓第4張也能進到主視角
-        tl.fromTo(
+        purifyTl.fromTo(
             orbit,
             { rotation: angleStep * 1.5 },
-            { rotation: -angleStep * 1.5, ease: "none" }
+            { rotation: -angleStep * 1.5, ease: "none", force3D: true }
         );
 
-        // 子節點反向補償
         nodes.forEach((node) => {
-            tl.fromTo(
+            purifyTl.fromTo(
                 node,
                 { rotation: -angleStep * 1.5 },
-                { rotation: angleStep * 1.5, ease: "none" },
+                { rotation: angleStep * 1.5, ease: "none", force3D: true },
                 0
             );
         });
 
-        gsap.fromTo(".stat-card",
+        gsap.fromTo(
+            ".stat-card",
             {
                 y: 50,
                 opacity: 0
@@ -667,44 +809,55 @@
             {
                 y: 0,
                 opacity: 1,
-                duration: 1.2,
+                duration: isMobile ? 0.8 : 1.2,
                 ease: "power3.out",
-                stagger: 0.16,
+                stagger: isMobile ? 0.1 : 0.16,
+                force3D: true,
                 scrollTrigger: {
                     trigger: ".section-stats",
-                    start: "top 72%",
+                    start: "top 78%",
                     once: true
                 }
             }
         );
 
-        gsap.set(".image-before-1", { yPercent: 0 });
-        gsap.set(".image-after-1", { yPercent: 0 });
-
-        gsap.set(".image-before-2", { yPercent: 100 });
-        gsap.set(".image-after-2", { yPercent: -100 });
+        gsap.set(".image-before-1", { yPercent: 0, force3D: true });
+        gsap.set(".image-after-1", { yPercent: 0, force3D: true });
+        gsap.set(".image-before-2", { yPercent: 100, force3D: true });
+        gsap.set(".image-after-2", { yPercent: -100, force3D: true });
 
         const compareTl = gsap.timeline({
             scrollTrigger: {
                 trigger: ".section-compare",
                 start: "top top",
-                end: "+=2200",
-                scrub: 1,
+                end: isMobile ? "+=1400" : "+=2200",
+                scrub: isMobile ? 0.4 : 1,
                 pin: true,
                 pinSpacing: true,
-                anticipatePin: 1
+                anticipatePin: 1,
+                invalidateOnRefresh: true
             }
         });
 
         compareTl
             .to(".image-before-2", {
                 yPercent: 0,
-                ease: "none"
+                ease: "none",
+                force3D: true
             }, 0)
             .to(".image-after-2", {
                 yPercent: 0,
-                ease: "none"
+                ease: "none",
+                force3D: true
             }, 0);
+
+        window.addEventListener("load", () => {
+            ScrollTrigger.refresh();
+        });
+
+        window.addEventListener("resize", () => {
+            ScrollTrigger.refresh();
+        });
     </script>
 </body>
 </html>
